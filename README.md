@@ -1,8 +1,6 @@
 # dns-monitor-dns-client
 
-[![][myjenkins img]][myjenkins]
+[![Build Status](https://build.carminestar.com/buildStatus/icon?job=dns-monitor-dns-client)](https://build.carminestar.com/job/dns-monitor-dns-client/)
 
 A simple DNS client packaged as a RESTful service.
 
-[myjenkins]:https://build.carminestar.com/job/dns-monitor-dns-client/
-[myjenkins img]:https://build.carminestar.com/buildStatus/icon?dns-monitor-dns-client
