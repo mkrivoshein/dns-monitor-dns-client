@@ -1,28 +1,9 @@
 package io.dnsmonitor.dns.client.dnsjava;
 
 import io.dnsmonitor.dns.client.DnsLookupCommand;
-import io.dnsmonitor.dns.client.model.ADnsRecord;
-import io.dnsmonitor.dns.client.model.AaaaDnsRecord;
-import io.dnsmonitor.dns.client.model.CaaDnsRecord;
-import io.dnsmonitor.dns.client.model.CnameDnsRecord;
-import io.dnsmonitor.dns.client.model.DnsRecord;
-import io.dnsmonitor.dns.client.model.MxDnsRecord;
-import io.dnsmonitor.dns.client.model.NsDnsRecord;
-import io.dnsmonitor.dns.client.model.SrvDnsRecord;
-import io.dnsmonitor.dns.client.model.TxtDnsRecord;
-import io.dnsmonitor.dns.client.model.UnknownDnsRecord;
-import org.xbill.DNS.AAAARecord;
-import org.xbill.DNS.ARecord;
-import org.xbill.DNS.CAARecord;
-import org.xbill.DNS.CNAMERecord;
-import org.xbill.DNS.Lookup;
-import org.xbill.DNS.MXRecord;
-import org.xbill.DNS.NSRecord;
+import io.dnsmonitor.dns.client.model.*;
 import org.xbill.DNS.Record;
-import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.TXTRecord;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
+import org.xbill.DNS.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -71,6 +52,8 @@ public class DnsJavaAdapter {
             answer = convertSrvRecord((SRVRecord) record);
         } else if (record instanceof CAARecord) {
             answer = convertCaaRecord((CAARecord) record);
+        } else if (record instanceof SOARecord) {
+            answer = convertSoaRecord((SOARecord) record);
         } else {
             answer = new UnknownDnsRecord(Type.string(record.getType()));
         }
@@ -111,5 +94,11 @@ public class DnsJavaAdapter {
 
     private static DnsRecord convertCaaRecord(CAARecord record) {
         return new CaaDnsRecord(record.getFlags(), record.getTag(), record.getValue());
+    }
+
+    private static DnsRecord convertSoaRecord(SOARecord record) {
+        return new SoaDnsRecord(record.getHost().toString(true),
+                record.getAdmin().toString(true),
+                record.getSerial());
     }
 }
