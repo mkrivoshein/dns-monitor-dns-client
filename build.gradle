@@ -1,12 +1,24 @@
+buildscript {
+	repositories {
+		maven { url "https://plugins.gradle.org/m2/" }
+		maven { url "https://repo.spring.io/libs-release/" }
+		mavenCentral()
+		maven { url "https://repo.spring.io/milestone/" }
+		maven { url "https://ajoberstar.org/bintray-backup/" }
+	}
+}
+
 plugins {
-	id 'org.springframework.boot' version '2.2.6.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'org.springframework.boot' version '2.6.4'
+	id "io.spring.dependency-management" version "1.0.11.RELEASE"
 	id 'java'
 }
 
 group = 'io.dnsmonitor.dns'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+version = '0.1.0-SNAPSHOT'
+
+sourceCompatibility = 1.17
+targetCompatibility = 1.17
 
 repositories {
 	mavenCentral()
