@@ -12,6 +12,12 @@ public class DnsClientController {
         this.worker = worker;
     }
 
+    @GetMapping("/dns/{domain}")
+    @SuppressWarnings("unused")
+    public DnsClientReply dnsQuery(@PathVariable("domain") String domain) {
+        return new DnsClientReply(domain, worker.lookup(domain));
+    }
+
     @GetMapping("/dns/{recordtype}/{domain}")
     @SuppressWarnings("unused")
     public DnsClientReply dnsQuery(@PathVariable("recordtype") String recordType, @PathVariable("domain") String domain) {
