@@ -9,9 +9,10 @@ buildscript {
 }
 
 plugins {
+	id 'org.ajoberstar.reckon' version '0.16.1'
 	id 'org.springframework.boot' version '2.6.4'
 	id "io.spring.dependency-management" version "1.0.11.RELEASE"
-	id 'org.ajoberstar.reckon' version '0.16.1'
+	id 'com.google.cloud.tools.jib' version '3.2.0'
 	id 'java'
 	id "application"
 }
@@ -50,4 +51,35 @@ test {
 reckon {
 	scopeFromProp()
 	stageFromProp('rc', 'final')
+}
+
+jib {
+	from {
+		image = 'eclipse-temurin:17-alpine'
+	}
+	to {
+		image = 'ubuntuvm:5000/dnsmonitor/dns-client'
+		project.afterEvaluate {
+			def reconVersion = version.toString()
+			if (!reconVersion.contains("-rc")) {
+				tags = [version.toString(), 'latest']
+			} else {
+				tags = ['latest']
+			}
+		}
+	}
+	container {
+		mainClass = "io.dnsmonitor.dns.client.DnsClientApplication"
+		ports = ['8001']
+		format = 'OCI'
+
+		project.afterEvaluate {
+			labels = [
+					'version' : version.toString()
+			]
+		}
+
+		creationTime = 'USE_CURRENT_TIMESTAMP'
+	}
+	allowInsecureRegistries = true
 }
