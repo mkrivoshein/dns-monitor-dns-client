@@ -58,7 +58,7 @@ jib {
 		image = 'eclipse-temurin:17-alpine'
 	}
 	to {
-		image = 'ubuntuvm:5000/dnsmonitor/dns-client'
+		image = 'europe-docker.pkg.dev/dnsmonitor/containers/dns-client'
 		project.afterEvaluate {
 			def reconVersion = version.toString()
 			if (!reconVersion.contains("-rc")) {
