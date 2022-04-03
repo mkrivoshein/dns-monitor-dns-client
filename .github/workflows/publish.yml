@@ -9,13 +9,11 @@ on:
       - "v*"
 
 jobs:
-  job_id:
-    runs-on: ubuntu-latest
+  publish:
+    runs-on: ubuntu-20.04
     permissions:
       contents: 'read'
       id-token: 'write'
-    outputs:
-      access_token: ${{ steps.auth.outputs.access_token }}
     steps:
       - uses: 'actions/checkout@v3'
       - id: 'auth'
@@ -24,11 +22,6 @@ jobs:
         with:
           workload_identity_provider: 'projects/1026276598837/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
           service_account: 'github@dnsmonitor.iam.gserviceaccount.com'
-  build:
-    needs: job_id
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v2
     - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
@@ -47,7 +40,7 @@ jobs:
       with:
         registry: 'europe-docker.pkg.dev'
         username: 'oauth2accesstoken'
-        password: '${{ needs.job_id.outputs.access_token }}'
+        password: ${{ steps.auth.outputs.access_token }}
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
