@@ -59,7 +59,7 @@ reckon {
 
 jib {
 	from {
-		image = 'eclipse-temurin:17-alpine'
+		image = 'eclipse-temurin:17-focal'
 	}
 	to {
 		image = 'europe-docker.pkg.dev/dnsmonitor/containers/dns-client'
