@@ -14,6 +14,11 @@ public class DnsJavaAdapter {
     public DnsLookupCommand prepareLookup(String recordType, String domain) {
         return () -> {
             int recordTypeInt = convertRecordType(recordType.toUpperCase());
+
+            if (recordTypeInt == -1) {
+                throw new IllegalArgumentException("Unsupported record type: " + recordType);
+            }
+
             try {
                 Record[] records = new Lookup(domain, recordTypeInt).run();
 
@@ -30,7 +35,7 @@ public class DnsJavaAdapter {
         };
     }
 
-    static int convertRecordType(String recordType) {
+    public static int convertRecordType(String recordType) {
         return Type.value(recordType, false);
     }
 
