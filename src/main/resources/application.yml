@@ -1,5 +1,8 @@
 spring:
   application:
     name: dns-client
+  sleuth:
+    propagation:
+      type: W3C
 server:
   port: 8001
