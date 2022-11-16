@@ -18,7 +18,7 @@ jobs:
       - uses: 'actions/checkout@v3'
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v0'
+        uses: 'google-github-actions/auth@v1'
         with:
           workload_identity_provider: 'projects/1026276598837/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
           service_account: 'github@dnsmonitor.iam.gserviceaccount.com'
@@ -26,12 +26,12 @@ jobs:
           access_token_lifetime: '600s' # 10 minutes should be long enough
           create_credentials_file: false
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: '17'
       - name: Cache Gradle packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         env:
           cache-name: cache-gradle
         with:
@@ -39,7 +39,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-      - uses: 'docker/login-action@v1'
+      - uses: 'docker/login-action@v2'
         with:
           registry: 'europe-docker.pkg.dev'
           username: 'oauth2accesstoken'
