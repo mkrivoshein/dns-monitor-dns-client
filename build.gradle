@@ -23,7 +23,8 @@ sourceCompatibility = 1.17
 targetCompatibility = 1.17
 
 ext {
-	set('springCloudVersion', "2021.0.5")
+	set('springCloudVersion', "2022.0.0")
+	set('springCloudSleuthVersion', '3.1.5')
 	set('springCloudSleuthOtelVersion', '1.1.0')
 }
 
@@ -43,7 +44,7 @@ jar {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation ('org.springframework.cloud:spring-cloud-starter-sleuth') {
+	implementation ("org.springframework.cloud:spring-cloud-starter-sleuth:${springCloudSleuthVersion}") {
 		exclude group: 'org.springframework.cloud', module: 'spring-cloud-sleuth-brave'
 	}
 	implementation 'org.springframework.cloud:spring-cloud-sleuth-otel-autoconfigure'
