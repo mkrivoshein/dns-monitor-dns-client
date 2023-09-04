@@ -1,8 +1,8 @@
 spring:
   application:
     name: dns-client
-  sleuth:
-    propagation:
-      type: W3C
 server:
   port: 8001
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
