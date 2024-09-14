@@ -19,7 +19,7 @@ plugins {
 group = 'io.dnsmonitor.dns'
 
 ext {
-	set('springCloudVersion', "2022.0.3")
+	set('springCloudVersion', "2023.0.3")
 	set('micrometerVersion', "1.1.4")
 }
 
