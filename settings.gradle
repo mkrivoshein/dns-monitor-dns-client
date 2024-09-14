@@ -1,3 +1,5 @@
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
 plugins {
     id 'org.ajoberstar.reckon.settings' version '0.18.3'
 }
@@ -14,3 +16,12 @@ reckon {
     tagWriter = version -> "v" + version
 }
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven { url "https://repo.spring.io/libs-release" }
+        mavenCentral()
+        maven { url "https://repo.spring.io/milestone/" }
+        //google()
+    }
+}
