@@ -9,7 +9,6 @@ buildscript {
 }
 
 plugins {
-	id 'org.ajoberstar.reckon' version '0.18.3'
 	id 'org.springframework.boot' version '3.3.3'
 	id "io.spring.dependency-management" version "1.1.6"
 	id 'com.google.cloud.tools.jib' version '3.4.3'
@@ -71,15 +70,6 @@ java {
 
 test {
 	useJUnitPlatform()
-}
-
-reckon {
-	stages('rc', 'final')
-
-	// how do you calculate the scope/stage
-	scopeCalc = calcScopeFromProp().or(calcScopeFromCommitMessages()) // fall back to commit message (see below) if no explicit prop set
-	stageCalc = calcStageFromProp()
-	tagWriter = version -> "v" + version
 }
 
 jib {
