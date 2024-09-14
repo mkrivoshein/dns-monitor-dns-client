@@ -19,9 +19,6 @@ plugins {
 
 group = 'io.dnsmonitor.dns'
 
-sourceCompatibility = 1.17
-targetCompatibility = 1.17
-
 ext {
 	set('springCloudVersion', "2022.0.3")
 	set('micrometerVersion', "1.1.4")
@@ -49,6 +46,9 @@ dependencies {
 	implementation 'dnsjava:dnsjava:3.5.3'
 	implementation 'org.apache.commons:commons-text:1.12.0'
 	implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
@@ -57,6 +57,15 @@ dependencies {
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+java {
+	sourceCompatibility = 21
+	targetCompatibility = 21
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+		vendor = JvmVendorSpec.ADOPTIUM
 	}
 }
 
@@ -75,7 +84,7 @@ reckon {
 
 jib {
 	from {
-		image = 'eclipse-temurin:17-focal'
+		image = 'eclipse-temurin:21-noble' // Noble = Ubuntu 24.04 LTS
 	}
 	to {
 		image = 'europe-docker.pkg.dev/dnsmonitor/containers/dns-client'
