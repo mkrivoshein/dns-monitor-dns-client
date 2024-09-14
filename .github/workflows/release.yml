@@ -33,5 +33,7 @@ jobs:
           ~/.gradle/wrapper
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+    - name: Generate and submit dependency graph
+      uses: gradle/actions/dependency-submission@v4
     - name: Build with Gradle
       run: ./gradlew -Dorg.gradle.welcome=never build
