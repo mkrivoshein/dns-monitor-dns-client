@@ -16,6 +16,8 @@ jobs:
       id-token: 'write'
     steps:
       - uses: 'actions/checkout@v4'
+        with:
+          fetch-tags: 'true'
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v2'
