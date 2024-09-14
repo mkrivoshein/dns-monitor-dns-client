@@ -27,6 +27,8 @@ jobs:
           create_credentials_file: false
       - name: Set up JDK
         uses: actions/setup-java@v4.3.0
+        with:
+          java-version-file: .tool-versions
       - name: Cache Gradle packages
         uses: actions/cache@v4
         env:
