@@ -39,7 +39,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation "io.micrometer:micrometer-tracing-bridge-otel"
-	implementation 'dnsjava:dnsjava:3.6.1'
+	implementation 'dnsjava:dnsjava:3.6.2'
 	implementation 'org.apache.commons:commons-text:1.12.0'
 	implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
