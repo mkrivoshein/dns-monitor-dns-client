@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  pull-requests: write
+
 jobs:
   build:
 
@@ -22,20 +25,9 @@ jobs:
       with:
         distribution: 'adopt'
         java-version-file: '.tool-versions'
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
-      env:
-        cache-name: cache-gradle
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
       with:
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Generate and submit dependency graph
-      uses: gradle/actions/dependency-submission@v4
-    - name: Perform dependency review
-      uses: actions/dependency-review-action@v4
+        add-job-summary-as-pr-comment: 'always'
     - name: Build with Gradle
       run: ./gradlew -Dorg.gradle.welcome=never build

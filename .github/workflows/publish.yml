@@ -30,21 +30,12 @@ jobs:
         with:
           distribution: 'adopt'
           java-version-file: '.tool-versions'
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-gradle
-        with:
-          key: ${{ runner.os }}-build-${{ env.cache-name }}
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
       - uses: 'docker/login-action@v3'
         with:
           registry: 'europe-docker.pkg.dev'
           username: 'oauth2accesstoken'
           password: ${{ steps.auth.outputs.access_token }}
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew -Dorg.gradle.welcome=never jib
