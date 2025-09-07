@@ -9,8 +9,8 @@ buildscript {
 }
 
 plugins {
-	id 'org.springframework.boot' version '3.3.3'
-	id "io.spring.dependency-management" version "1.1.6"
+	id 'org.springframework.boot' version '3.5.0'
+	id "io.spring.dependency-management" version "1.1.7"
 	id 'com.google.cloud.tools.jib' version '3.4.5'
 	id 'java'
 	id "application"
@@ -19,11 +19,16 @@ plugins {
 group = 'io.dnsmonitor.dns'
 
 ext {
-	set('springVersion', "6.1.13")
-	set('springCloudVersion', "2023.0.3")
-	set('micrometerVersion', "1.13.4")
-	set('micrometerTracingVersion', "1.3.4")
-	set('opentelemetryVersion', "1.42.1")
+	set('spring-framework.version', '6.2.10')
+	set('spring-cloud.version', "2025.0.0")
+	set('micrometer.version', "1.15.0") //1.14.10
+	set('micrometer-tracing.version', "1.5.0") // 1.4.9
+	set('opentelemetry.version', "1.49.0")
+
+	set('commons-lang3.version', '3.18.0')
+	set('slf4j.version', '2.0.17')
+
+	set('junit-jupiter.version', '5.13.4')
 }
 
 application {
@@ -44,16 +49,17 @@ dependencies {
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
     //TODO: add implementation 'io.micrometer:micrometer-registry-prometheus' // For Prometheus metrics
 
-    implementation 'dnsjava:dnsjava:3.6.3'
-    implementation 'org.apache.commons:commons-text:1.14.0'
+    implementation 'dnsjava:dnsjava'
+    implementation 'org.apache.commons:commons-text'
+	implementation 'org.apache.commons:commons-lang3'
 
     // Annotations for static analysis
     implementation 'com.github.spotbugs:spotbugs-annotations:4.9.4' // Modern replacement for JSR305
     compileOnly 'org.jetbrains:annotations:24.1.0' // JetBrains annotations for better IDE support
 
     // Test dependencies
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
-	testImplementation 'org.xmlunit:xmlunit-core:2.10.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.xmlunit:xmlunit-core:2.10.1'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
@@ -62,15 +68,34 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-dependencyManagement {
+dependencyManagement {dm ->
 	imports {
-		mavenBom "org.springframework:spring-framework-bom:${springVersion}"
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-		mavenBom "io.opentelemetry:opentelemetry-bom:${opentelemetryVersion}"
-		mavenBom "io.micrometer:micrometer-bom:${micrometerVersion}"
-		mavenBom "io.micrometer:micrometer-tracing-bom:${micrometerTracingVersion}"
+		mavenBom "org.springframework:spring-framework-bom:${ext.get('spring-framework.version')}"
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${ext.get('spring-cloud.version')}"
+		mavenBom "io.opentelemetry:opentelemetry-bom:${ext.get('opentelemetry.version')}"
+		mavenBom "io.micrometer:micrometer-bom:${ext.get('micrometer.version')}"
+		mavenBom "io.micrometer:micrometer-tracing-bom:${ext.get('micrometer-tracing.version')}"
 	}
+	dependencies {
+		dependency 'dnsjava:dnsjava:3.6.3'
+		dependency 'org.apache.commons:commons-text:1.14.0'
+		dependency 'org.apache.commons:commons-lang3:3.18.0'
+	}
+
+//	// Print properties after imports are processed
+//	project.afterEvaluate {
+//		if (dm.importedProperties) {
+//			println "=== Imported Properties (sorted) ==="
+//			dm.importedProperties
+//					.sort()  // Sort map entries by key
+//					.each { key, value ->
+//						println "${key} = ${value}"
+//					}
+//		}
+//	}
 }
+
+
 
 java {
 	sourceCompatibility = 21
