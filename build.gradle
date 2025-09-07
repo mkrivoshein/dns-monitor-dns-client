@@ -35,20 +35,31 @@ jar {
 }
 
 dependencies {
+	// Spring Boot starters
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation "io.micrometer:micrometer-tracing-bridge-otel"
-	implementation 'dnsjava:dnsjava:3.6.3'
-	implementation 'org.apache.commons:commons-text:1.13.0'
-	implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
+    // Observability and monitoring
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+    //TODO: add implementation 'io.micrometer:micrometer-registry-prometheus' // For Prometheus metrics
+
+    implementation 'dnsjava:dnsjava:3.6.3'
+    implementation 'org.apache.commons:commons-text:1.14.0'
+
+    // Annotations for static analysis
+    implementation 'com.github.spotbugs:spotbugs-annotations:4.9.4' // Modern replacement for JSR305
+    compileOnly 'org.jetbrains:annotations:24.1.0' // JetBrains annotations for better IDE support
+
+    // Test dependencies
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
 	testImplementation 'org.xmlunit:xmlunit-core:2.10.0'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+
+	// Test runtime
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
