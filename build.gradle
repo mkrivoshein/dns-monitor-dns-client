@@ -70,6 +70,7 @@ dependencies {
 }
 
 dependencyManagement {dm ->
+	applyMavenExclusions = false
 	imports {
 		mavenBom "org.springframework:spring-framework-bom:${ext.get('spring-framework.version')}"
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${ext.get('spring-cloud.version')}"
