@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-	id 'org.springframework.boot' version '3.5.5'
+	id 'org.springframework.boot' version '4.0.5'
 	id "io.spring.dependency-management" version "1.1.7"
 	id 'com.google.cloud.tools.jib' version '3.4.5'
 	id 'java'
@@ -19,18 +19,13 @@ plugins {
 group = 'io.dnsmonitor.dns'
 
 ext {
-	set('spring-framework.version', '6.2.10')
-	set('spring-cloud.version', "2025.0.0")
-	set('tomcat.version', '10.1.52')
-	set('micrometer.version', "1.15.0") //1.14.10
-	set('micrometer-tracing.version', "1.5.0") // 1.4.9
-	set('opentelemetry.version', "1.49.0")
+	set('spring-framework.version', '7.0.6')
+	set('spring-cloud.version', "2025.1.1")
+	set('micrometer.version', "1.16.4")
+	set('micrometer-tracing.version', "1.6.4")
+	set('opentelemetry.version', "1.55.0")
 
-	set('commons-lang3.version', '3.18.0')
-	set('slf4j.version', '2.0.17')
-
-	set('junit-jupiter.version', '5.13.4')
-	set('assertj.version', '3.27.7')
+	set('commons-lang3.version', '3.19.0')
 }
 
 application {
@@ -48,6 +43,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Observability and monitoring
+    implementation 'org.springframework.boot:spring-boot-micrometer-tracing'
     implementation 'io.micrometer:micrometer-tracing-bridge-otel'
     //TODO: add implementation 'io.micrometer:micrometer-registry-prometheus' // For Prometheus metrics
 
@@ -61,7 +57,7 @@ dependencies {
 
     // Test dependencies
 	testImplementation 'org.junit.jupiter:junit-jupiter'
-	testImplementation 'org.xmlunit:xmlunit-core:2.10.3'
+	testImplementation 'org.xmlunit:xmlunit-core'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
@@ -82,7 +78,6 @@ dependencyManagement {dm ->
 	dependencies {
 		dependency 'dnsjava:dnsjava:3.6.3'
 		dependency 'org.apache.commons:commons-text:1.14.0'
-		dependency 'org.apache.commons:commons-lang3:3.18.0'
 	}
 
 //	// Print properties after imports are processed
