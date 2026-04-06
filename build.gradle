@@ -30,6 +30,7 @@ ext {
 	set('slf4j.version', '2.0.17')
 
 	set('junit-jupiter.version', '5.13.4')
+	set('assertj.version', '3.27.7')
 }
 
 application {
