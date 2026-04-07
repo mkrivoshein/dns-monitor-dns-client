@@ -26,6 +26,7 @@ ext {
 	set('opentelemetry.version', "1.55.0")
 
 	set('commons-lang3.version', '3.20.0')
+	set('jackson-bom.version', '3.1.1') // CVE fix: document length constraint bypass in jackson-core 3.1.0
 }
 
 application {
