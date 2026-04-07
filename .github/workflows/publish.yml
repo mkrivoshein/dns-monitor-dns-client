@@ -3,6 +3,9 @@
 
 name: Publish
 
+env:
+  REGISTRY: 'europe-docker.pkg.dev'
+
 on:
   push:
     tags:
@@ -15,26 +18,26 @@ jobs:
       contents: 'read'
       id-token: 'write'
     steps:
-      - uses: 'actions/checkout@v4'
+      - uses: 'actions/checkout@v6'
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v2'
+        uses: 'google-github-actions/auth@v3'
         with:
-          workload_identity_provider: 'projects/1026276598837/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-          service_account: 'github@dnsmonitor.iam.gserviceaccount.com'
+          workload_identity_provider: '${{ secrets.GCP_WIP }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
           token_format: 'access_token'
           access_token_lifetime: '600s' # 10 minutes should be long enough
           create_credentials_file: false
       - name: Set up JDK
-        uses: actions/setup-java@v4.3.0
+        uses: actions/setup-java@v5
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version-file: '.tool-versions'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-      - uses: 'docker/login-action@v3'
+        uses: gradle/actions/setup-gradle@v6
+      - uses: 'docker/login-action@v4'
         with:
-          registry: 'europe-docker.pkg.dev'
+          registry: ${{ env.REGISTRY }}
           username: 'oauth2accesstoken'
           password: ${{ steps.auth.outputs.access_token }}
       - name: Build with Gradle
