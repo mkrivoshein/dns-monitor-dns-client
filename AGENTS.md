@@ -4,7 +4,7 @@ Guidance for AI agents (e.g. Claude Code) working in this repository.
 
 ## Project overview
 
-`dns-monitor-dns-client` is a Spring Boot 3.x RESTful service that performs DNS lookups
+`dns-monitor-dns-client` is a Spring Boot 4.x RESTful service that performs DNS lookups
 via [dnsjava](https://github.com/dnsjava/dnsjava) and exposes the results as JSON.
 It runs on port **8001** and is published as an OCI container image to Google Artifact Registry.
 
