@@ -60,7 +60,7 @@ The service listens on port **8001**.
 
 | Component | Technology |
 |-----------|-----------|
-| Framework | Spring Boot 3.x |
+| Framework | Spring Boot 4.x |
 | DNS resolution | [dnsjava](https://github.com/dnsjava/dnsjava) |
 | Observability | Micrometer Tracing (OpenTelemetry) |
 | Container image | [Jib](https://github.com/GoogleContainerTools/jib) → `eclipse-temurin:21-noble` |
