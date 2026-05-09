@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.mock.env.MockEnvironment;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,16 +84,18 @@ class ConditionalTlsEnvironmentPostProcessorTest {
     }
 
     @Test
-    void rejectsPlainHttpTlsResourceLocations() {
-        var environment = new MockEnvironment();
-        environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
-                "dns.client.tls.certificate", "http://example.test/server.crt",
-                "dns.client.tls.private-key", "/run/tls/server.key"
-        )));
+    void rejectsPlainHttpTlsResourceLocationsCaseInsensitively() {
+        for (var certificateLocation : List.of("http://example.test/server.crt", "HtTp://example.test/server.crt")) {
+            var environment = new MockEnvironment();
+            environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
+                    "dns.client.tls.certificate", certificateLocation,
+                    "dns.client.tls.private-key", "/run/tls/server.key"
+            )));
 
-        assertThatThrownBy(() -> postProcessor.postProcessEnvironment(environment, new SpringApplication()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("must not be loaded from plain HTTP");
+            assertThatThrownBy(() -> postProcessor.postProcessEnvironment(environment, new SpringApplication()))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("must not be loaded from plain HTTP");
+        }
     }
 
     @Test
