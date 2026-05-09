@@ -1,0 +1,2 @@
+org.springframework.boot.EnvironmentPostProcessor=\
+io.dnsmonitor.dns.client.config.ConditionalTlsEnvironmentPostProcessor

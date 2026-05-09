@@ -49,12 +49,72 @@ Invalid domains or unsupported record types return HTTP 400.
 ./gradlew bootRun
 ```
 
-The service listens on port **8001**.
+The service listens on port **8001** by default.
 
 ```bash
 ./gradlew build   # compile + test
 ./gradlew test    # tests only
 ```
+
+## HTTPS and mTLS
+
+By default the service starts with plain HTTP. If a server certificate and private key are
+provided at startup, the app enables HTTPS. If a client CA is also provided, the app
+requires client certificates and verifies them against that CA.
+
+Supported properties and environment variables:
+
+| Property | Environment aliases | Description |
+|----------|---------------------|-------------|
+| `dns.client.tls.certificate` | `DNS_CLIENT_TLS_CERTIFICATE`, `DNS_CLIENT_TLS_CERT` | Server certificate path/resource |
+| `dns.client.tls.private-key` | `DNS_CLIENT_TLS_PRIVATE_KEY`, `DNS_CLIENT_TLS_KEY` | Server private key path/resource |
+| `dns.client.tls.client-ca` | `DNS_CLIENT_TLS_CLIENT_CA` | Client CA path/resource; enables mTLS |
+
+Plain HTTP:
+
+```bash
+./gradlew bootRun
+```
+
+HTTPS:
+
+```bash
+DNS_CLIENT_TLS_CERT=/run/tls/server.crt \
+DNS_CLIENT_TLS_KEY=/run/tls/server.key \
+./gradlew bootRun
+```
+
+mTLS:
+
+```bash
+DNS_CLIENT_TLS_CERT=/run/tls/server.crt \
+DNS_CLIENT_TLS_KEY=/run/tls/server.key \
+DNS_CLIENT_TLS_CLIENT_CA=/run/tls/client-ca.crt \
+./gradlew bootRun
+```
+
+Docker can publish a different host port while the app still listens on container port
+`8001`:
+
+```bash
+docker run -p 8080:8001 \
+  -e DNS_CLIENT_TLS_CERT=/run/tls/server.crt \
+  -e DNS_CLIENT_TLS_KEY=/run/tls/server.key \
+  -e DNS_CLIENT_TLS_CLIENT_CA=/run/tls/client-ca.crt \
+  -v /host/tls:/run/tls:ro \
+  europe-docker.pkg.dev/dnsmonitor/containers/dns-client
+```
+
+Absolute filesystem paths are converted to `file:` resource URLs automatically. Relative
+paths, `classpath:`, and explicit `file:` URLs are passed through to Spring Boot SSL
+bundles. TLS files are loaded at startup, so rotating the certificate, private key, or
+client CA on disk requires restarting the app/container.
+
+When TLS is configured, the app checks the server certificate expiry, and the client CA
+expiry when present, immediately and then every 5 minutes using a daemon scheduled
+executor named `dns-client-cert-expiry-monitor`. If any checked certificate expires
+within 10 minutes of the check time, the process exits with a non-zero status so the
+container supervisor can restart it and load fresh TLS material.
 
 ## Tech stack
 
