@@ -6,6 +6,10 @@ import org.springframework.util.StringUtils;
 import java.nio.file.Path;
 
 final class TlsConfigurationProperties {
+    private static final String CLASSPATH_SCHEME = "classpath:";
+    private static final String FILE_SCHEME = "file:";
+    private static final String HTTP_SCHEME = "http:";
+    private static final String HTTPS_SCHEME = "https:";
     static final String CERTIFICATE_PROPERTY = "dns.client.tls.certificate";
     static final String CERTIFICATE_ENV = "DNS_CLIENT_TLS_CERTIFICATE";
     static final String CERTIFICATE_SHORT_ENV = "DNS_CLIENT_TLS_CERT";
@@ -41,10 +45,13 @@ final class TlsConfigurationProperties {
     }
 
     static String normalizeResourceLocation(String location) {
-        if (location.startsWith("classpath:")
-                || location.startsWith("file:")
-                || location.startsWith("http:")
-                || location.startsWith("https:")) {
+        if (hasScheme(location, HTTP_SCHEME)) {
+            throw new IllegalStateException("TLS resources must not be loaded from plain HTTP: " + location);
+        }
+
+        if (hasScheme(location, CLASSPATH_SCHEME)
+                || hasScheme(location, FILE_SCHEME)
+                || hasScheme(location, HTTPS_SCHEME)) {
             return location;
         }
 
@@ -54,5 +61,9 @@ final class TlsConfigurationProperties {
         }
 
         return location;
+    }
+
+    private static boolean hasScheme(String location, String scheme) {
+        return location.regionMatches(true, 0, scheme, 0, scheme.length());
     }
 }

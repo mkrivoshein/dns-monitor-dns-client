@@ -64,10 +64,11 @@ Supported startup properties:
 | `dns.client.tls.client-ca` | `DNS_CLIENT_TLS_CLIENT_CA` | Client CA certificate path/resource; enables required client auth |
 
 Absolute filesystem paths are converted to `file:` resource URLs automatically. Relative
-paths, `classpath:`, and explicit `file:` URLs are passed through to Spring Boot SSL
-bundles. TLS files are loaded at startup; restart the app/container after certificate,
-private key, or client CA rotation. When TLS is configured, a daemon scheduled executor
-named `dns-client-cert-expiry-monitor` checks the server certificate, and the client CA
+paths, `classpath:`, explicit `file:` URLs, and `https:` URLs are passed through to Spring
+Boot SSL bundles. Plain `http:` URLs are rejected for TLS resources. TLS files are loaded
+at startup; restart the app/container after certificate, private key, or client CA
+rotation. When TLS is configured, a daemon scheduled executor named
+`dns-client-cert-expiry-monitor` checks the server certificate, and the client CA
 certificate when present, immediately and then every 5 minutes. If any checked
 certificate expires within 10 minutes of the check time, the app exits with a non-zero
 status so the container supervisor can restart it. Do not commit certificates, private

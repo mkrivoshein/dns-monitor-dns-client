@@ -106,9 +106,10 @@ docker run -p 8080:8001 \
 ```
 
 Absolute filesystem paths are converted to `file:` resource URLs automatically. Relative
-paths, `classpath:`, and explicit `file:` URLs are passed through to Spring Boot SSL
-bundles. TLS files are loaded at startup, so rotating the certificate, private key, or
-client CA on disk requires restarting the app/container.
+paths, `classpath:`, explicit `file:` URLs, and `https:` URLs are passed through to Spring
+Boot SSL bundles. Plain `http:` URLs are rejected for TLS resources. TLS files are loaded
+at startup, so rotating the certificate, private key, or client CA on disk requires
+restarting the app/container.
 
 When TLS is configured, the app checks the server certificate expiry, and the client CA
 expiry when present, immediately and then every 5 minutes using a daemon scheduled

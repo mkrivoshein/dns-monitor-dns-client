@@ -81,4 +81,36 @@ class ConditionalTlsEnvironmentPostProcessorTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Both dns.client.tls.certificate and dns.client.tls.private-key");
     }
+
+    @Test
+    void rejectsPlainHttpTlsResourceLocations() {
+        var environment = new MockEnvironment();
+        environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
+                "dns.client.tls.certificate", "http://example.test/server.crt",
+                "dns.client.tls.private-key", "/run/tls/server.key"
+        )));
+
+        assertThatThrownBy(() -> postProcessor.postProcessEnvironment(environment, new SpringApplication()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("must not be loaded from plain HTTP");
+    }
+
+    @Test
+    void preservesHttpsTlsResourceLocations() {
+        var environment = new MockEnvironment();
+        environment.getPropertySources().addFirst(new MapPropertySource("test", Map.of(
+                "dns.client.tls.certificate", "https://example.test/server.crt",
+                "dns.client.tls.private-key", "https://example.test/server.key",
+                "dns.client.tls.client-ca", "https://example.test/client-ca.crt"
+        )));
+
+        postProcessor.postProcessEnvironment(environment, new SpringApplication());
+
+        assertThat(environment.getProperty("spring.ssl.bundle.pem.dns-client.keystore.certificate"))
+                .isEqualTo("https://example.test/server.crt");
+        assertThat(environment.getProperty("spring.ssl.bundle.pem.dns-client.keystore.private-key"))
+                .isEqualTo("https://example.test/server.key");
+        assertThat(environment.getProperty("spring.ssl.bundle.pem.dns-client.truststore.certificate"))
+                .isEqualTo("https://example.test/client-ca.crt");
+    }
 }
