@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-	id 'org.springframework.boot' version '4.0.5'
+	id 'org.springframework.boot' version '4.0.6'
 	id "io.spring.dependency-management" version "1.1.7"
 	id 'com.google.cloud.tools.jib' version '3.5.3'
 	id 'java'
@@ -19,7 +19,7 @@ plugins {
 group = 'io.dnsmonitor.dns'
 
 ext {
-	set('spring-framework.version', '7.0.6')
+	set('spring-framework.version', '7.0.7')
 	set('spring-cloud.version', "2025.1.1")
 	set('micrometer.version', "1.16.4")
 	set('micrometer-tracing.version', "1.6.4")
@@ -77,22 +77,11 @@ dependencyManagement {dm ->
 		mavenBom "io.micrometer:micrometer-tracing-bom:${ext.get('micrometer-tracing.version')}"
 	}
 	dependencies {
-		dependency 'dnsjava:dnsjava:3.6.3'
-		dependency 'org.apache.commons:commons-text:1.14.0'
+		dependency 'dnsjava:dnsjava:3.6.5'
+		dependency 'org.apache.commons:commons-text:1.15.0'
 		dependency 'org.apache.commons:commons-lang3:3.20.0'
 	}
 
-//	// Print properties after imports are processed
-//	project.afterEvaluate {
-//		if (dm.importedProperties) {
-//			println "=== Imported Properties (sorted) ==="
-//			dm.importedProperties
-//					.sort()  // Sort map entries by key
-//					.each { key, value ->
-//						println "${key} = ${value}"
-//					}
-//		}
-//	}
 }
 
 
@@ -116,14 +105,9 @@ jib {
 	}
 	to {
 		image = 'europe-docker.pkg.dev/dnsmonitor/containers/dns-client'
-		project.afterEvaluate {
-			def reconVersion = version.toString()
-			if (!reconVersion.contains("-rc")) {
-				tags = [version.toString(), 'latest']
-			} else {
-				tags = ['latest']
-			}
-		}
+
+		def imageVersion = project.version.toString()
+		tags = imageVersion.contains("-rc") ? ['latest'] : [imageVersion, 'latest']
 	}
 	container {
 		mainClass = "io.dnsmonitor.dns.client.DnsClientApplication"
