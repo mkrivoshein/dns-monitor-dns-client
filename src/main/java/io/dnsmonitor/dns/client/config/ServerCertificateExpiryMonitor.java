@@ -18,7 +18,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;

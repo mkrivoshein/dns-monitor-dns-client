@@ -18,12 +18,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.env.MockEnvironment;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.Clock;
 import java.time.Duration;
@@ -140,7 +137,7 @@ class ServerCertificateExpiryMonitorTest {
     }
 
     @Test
-    void loadCertificatesFailsAndExitsWhenResourceMissing() {
+    void loadCertificatesFailsAndExitsWhenCertificateCannotBeLoaded() {
         var monitor = monitorWith("not-a-pem".getBytes());
 
         monitor.checkCertificates("file:does-not-exist.pem", null);
@@ -171,18 +168,18 @@ class ServerCertificateExpiryMonitorTest {
         var sb = new StringBuilder();
         for (var cert : certs) {
             sb.append("-----BEGIN CERTIFICATE-----\n");
-            sb.append(Base64.getMimeEncoder(64, "\n".getBytes()).encodeToString(cert.getEncoded()));
+            sb.append(Base64.getMimeEncoder(64, "\n".getBytes(java.nio.charset.StandardCharsets.US_ASCII))
+                    .encodeToString(cert.getEncoded()));
             sb.append("\n-----END CERTIFICATE-----\n");
         }
-        return sb.toString().getBytes();
-    }
+        return sb.toString().getBytes(java.nio.charset.StandardCharsets.US_ASCII);
 
     private static X509Certificate selfSignedCertificate(String subjectDn, Instant notAfter) throws Exception {
         var keyPair = generateRsa();
         var name = new X500Name(subjectDn);
         var builder = new JcaX509v3CertificateBuilder(
                 name,
-                BigInteger.valueOf(System.nanoTime()),
+                BigInteger.valueOf(System.nanoTime()).abs().add(BigInteger.ONE),
                 Date.from(NOW.minusSeconds(60)),
                 Date.from(notAfter),
                 name,
