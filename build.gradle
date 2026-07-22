@@ -5,6 +5,19 @@ buildscript {
 		mavenCentral()
 		maven { url = uri("https://repo.spring.io/milestone/") }
 	}
+	// Force-patch BouncyCastle transitives pulled in by buildscript plugins
+	// (axion-release-plugin transitively requires jgit, which requires
+	// bcprov-jdk18on). The dependency-review job rejects CVE-2025-14813
+	// (critical) and CVE-2026-5598 (high) in 1.82; force every BouncyCastle
+	// module to the patched 1.85 on the buildscript classpath.
+	configurations.classpath {
+		resolutionStrategy {
+			force 'org.bouncycastle:bcprov-jdk18on:1.85'
+			force 'org.bouncycastle:bcpkix-jdk18on:1.85'
+			force 'org.bouncycastle:bcpg-jdk18on:1.85'
+			force 'org.bouncycastle:bcutil-jdk18on:1.85'
+		}
+	}
 }
 
 plugins {
@@ -111,6 +124,13 @@ dependencyManagement {dm ->
 		dependency 'org.apache.commons:commons-text:1.15.0'
 		dependency 'org.apache.commons:commons-lang3:3.20.0'
 		dependency 'org.bouncycastle:bcpkix-jdk18on:1.85'
+		// Pin BouncyCastle modules to 1.85 to override vulnerable transitives
+		// pulled in by axion-release-plugin (via jgit). Without this the
+		// dependency-review job fails on CVE-2025-14813 (critical) and
+		// CVE-2026-5598 (high) in bcprov-jdk18on 1.82.
+		dependency 'org.bouncycastle:bcprov-jdk18on:1.85'
+		dependency 'org.bouncycastle:bcpg-jdk18on:1.85'
+		dependency 'org.bouncycastle:bcutil-jdk18on:1.85'
 	}
 
 }
