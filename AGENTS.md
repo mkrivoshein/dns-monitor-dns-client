@@ -123,6 +123,7 @@ Co-Authored-By: Codex (GPT-5) <codex@openai.com>
 Co-Authored-By: Gemini 3 Flash <noreply@google.com>
 Co-Authored-By: Claude (claude-opus-4-7) <noreply@anthropic.com>
 Co-Authored-By: Claude (claude-sonnet-4-6) <noreply@anthropic.com>
+Co-Authored-By: MiniMax-M3 <noreply@minimax.io>
 
 Common types: `feat`, `fix`, `test`, `refactor`, `chore`.
 Common scopes: `meter`, `invoice`, `pricing`, `metrics`, `vault`, `stripe`, `xero`.
