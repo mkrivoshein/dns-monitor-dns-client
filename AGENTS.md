@@ -128,6 +128,18 @@ produce. To override the resolved version when cutting a release:
 
 `release` is restricted to the `main` branch.
 
+## Gradle build performance
+
+`gradle.properties` enables the Gradle build cache and the configuration cache
+(`org.gradle.caching=true`, `org.gradle.configuration-cache=true`,
+`org.gradle.configuration-cache.problems=warn`). All tasks benefit except
+`jib` / `jibDockerBuild` / `jibBuildTar`, which Jib 3.5.x marks
+`notCompatibleWithConfigurationCache` in `build.gradle` because the plugin
+captures `org.gradle.api.Project` in its configuration-time closures. This
+is tracked upstream in
+[GoogleContainerTools/jib#3132](https://github.com/GoogleContainerTools/jib/issues/3132);
+remove the workaround and re-test on every Jib upgrade.
+
 ## CI / GitHub Actions
 
 | Workflow | Trigger | Purpose |

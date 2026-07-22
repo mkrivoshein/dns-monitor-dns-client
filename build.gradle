@@ -150,6 +150,12 @@ test {
 	useJUnitPlatform()
 }
 
+// Resolve the project version to a String once, at configuration time, so
+// the Jib configuration closure can reference a plain String instead of
+// capturing the org.gradle.api.Project instance (which is not serializable
+// under the configuration cache).
+def imageVersion = version.toString()
+
 jib {
 	from {
 		image = 'eclipse-temurin:21-noble' // Noble = Ubuntu 24.04 LTS
@@ -157,7 +163,6 @@ jib {
 	to {
 		image = 'europe-docker.pkg.dev/dnsmonitor/containers/dns-client'
 
-		def imageVersion = project.version.toString()
 		tags = imageVersion.contains("-rc") ? ['latest'] : [imageVersion, 'latest']
 	}
 	container {
@@ -168,4 +173,17 @@ jib {
 		creationTime = 'USE_CURRENT_TIMESTAMP'
 	}
 	allowInsecureRegistries = false
+}
+
+// Jib 3.5.x captures the org.gradle.api.Project instance in its
+// configuration-time closures, which the configuration cache refuses to
+// serialise. Mark all Jib tasks as not configuration-cache compatible
+// until upstream fixes
+// https://github.com/GoogleContainerTools/jib/issues/3132 (open since
+// 2021, still unresolved in 3.5.4). Without this the build fails with
+// "Cannot invoke Project.getProjectDir() because this.project is null".
+// All other tasks still benefit from the configuration cache.
+tasks.withType(com.google.cloud.tools.jib.gradle.JibTask).configureEach {
+	notCompatibleWithConfigurationCache(
+		"https://github.com/GoogleContainerTools/jib/issues/3132")
 }
