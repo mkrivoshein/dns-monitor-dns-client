@@ -173,6 +173,7 @@ class ServerCertificateExpiryMonitorTest {
             sb.append("\n-----END CERTIFICATE-----\n");
         }
         return sb.toString().getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+    }
 
     private static X509Certificate selfSignedCertificate(String subjectDn, Instant notAfter) throws Exception {
         var keyPair = generateRsa();
