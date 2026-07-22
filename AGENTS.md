@@ -99,6 +99,25 @@ Base image: `eclipse-temurin:21-noble`. Published to
 and is handled by the CI pipeline — do not run `jib` locally unless you have explicit
 registry access.
 
+## Versioning
+
+`project.version` is derived from the nearest git tag by
+[axion-release-plugin](https://github.com/allegro/axion-release-plugin) (1.21.x).
+Tags use the `v<version>` prefix (e.g. `v5.1.0`), matching the project's existing tag
+convention. On a non-tagged commit the resolved version is decorated with the branch
+name (e.g. `5.1.0-main`) so snapshots are obvious in image tags.
+
+Release flow:
+
+1. Cut a GPG-signed annotated tag on `main`:
+   `git tag -s -a -m "Release v5.2.0" v5.2.0`
+2. Push the tag: `git push origin v5.2.0`
+3. The `publish.yml` workflow builds and pushes the container image
+   (`europe-docker.pkg.dev/dnsmonitor/containers/dns-client:5.2.0` and `:latest`).
+
+`./gradlew currentVersion` prints the resolved version; use it to confirm what Jib will
+produce. `release` is restricted to the `main` branch.
+
 ## CI / GitHub Actions
 
 | Workflow | Trigger | Purpose |

@@ -5,6 +5,8 @@ buildscript {
 		mavenCentral()
 		maven { url = uri("https://repo.spring.io/milestone/") }
 		maven { url = uri("https://ajoberstar.org/bintray-backup/") }
+=======
+		maven { url "https://repo.spring.io/milestone/" }
 	}
 }
 
@@ -12,11 +14,32 @@ plugins {
 	id 'org.springframework.boot' version '4.0.6'
 	id "io.spring.dependency-management" version "1.1.7"
 	id 'com.google.cloud.tools.jib' version '3.5.3'
+	id 'pl.allegro.tech.build.axion-release' version '1.21.2'
 	id 'java'
 	id "application"
 }
 
 group = 'io.dnsmonitor.dns'
+
+// Derive project.version from the nearest git tag (default: 0.1.0).
+// Tag format is "v<version>" matching existing tags (v5.0.1, v5.1.0, ...).
+// Override at release time via:
+//   ./gradlew markNextVersion -Prelease.version=5.2.0
+scmVersion {
+	tag {
+		prefix = 'v'
+		versionSeparator = ''
+	}
+	// Match Reckon's old behaviour of restricting the "release" flow to the
+	// main branch. Tags outside main are still detected (and used to set
+	// project.version) but the `release` task refuses to run on them.
+	releaseOnlyOnReleaseBranches = true
+	releaseBranchNames = ['main']
+}
+
+// Apply the resolved version to the project so Jib (and other consumers of
+// project.version) see it.
+version = scmVersion.version
 
 ext {
 	set('spring-framework.version', '7.0.7')
