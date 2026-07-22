@@ -1,10 +1,10 @@
 buildscript {
 	repositories {
-		maven { url "https://plugins.gradle.org/m2/" }
-		maven { url "https://repo.spring.io/libs-release/" }
+		maven { url = uri("https://plugins.gradle.org/m2/") }
+		maven { url = uri("https://repo.spring.io/libs-release/") }
 		mavenCentral()
-		maven { url "https://repo.spring.io/milestone/" }
-		maven { url "https://ajoberstar.org/bintray-backup/" }
+		maven { url = uri("https://repo.spring.io/milestone/") }
+		maven { url = uri("https://ajoberstar.org/bintray-backup/") }
 	}
 }
 
