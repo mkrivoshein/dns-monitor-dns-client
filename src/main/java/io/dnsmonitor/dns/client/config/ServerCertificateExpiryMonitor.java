@@ -18,8 +18,8 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,6 +38,7 @@ public class ServerCertificateExpiryMonitor implements ApplicationRunner, Dispos
     private final ConfigurableApplicationContext applicationContext;
     private final Clock clock;
     private ScheduledExecutorService executorService;
+    private Runnable exitAction = this::exitApplication;
 
     @Autowired
     public ServerCertificateExpiryMonitor(Environment environment,
@@ -54,6 +55,10 @@ public class ServerCertificateExpiryMonitor implements ApplicationRunner, Dispos
         this.resourceLoader = resourceLoader;
         this.applicationContext = applicationContext;
         this.clock = clock;
+    }
+
+    void setExitAction(Runnable exitAction) {
+        this.exitAction = exitAction;
     }
 
     @Override
@@ -79,53 +84,52 @@ public class ServerCertificateExpiryMonitor implements ApplicationRunner, Dispos
         }
     }
 
-    private void checkCertificates(String certificateLocation, String clientCaLocation) {
+    void checkCertificates(String certificateLocation, String clientCaLocation) {
         if (StringUtils.hasText(certificateLocation)) {
-            checkCertificate(certificateLocation, "server TLS certificate", true);
+            checkCertificate(certificateLocation, "server TLS certificate");
         }
         if (StringUtils.hasText(clientCaLocation)) {
-            checkCertificate(clientCaLocation, "client CA certificate", false);
+            checkCertificate(clientCaLocation, "client CA certificate");
         }
     }
 
-    private void checkCertificate(String certificateLocation, String description, boolean firstCertificateOnly) {
+    private void checkCertificate(String certificateLocation, String description) {
         try {
-            for (var certificate : loadCertificates(certificateLocation, firstCertificateOnly)) {
+            var certificates = loadCertificates(certificateLocation);
+            var exitThreshold = clock.instant().plus(EXPIRY_EXIT_WINDOW);
+            for (var certificate : certificates) {
                 var expiresAt = certificate.getNotAfter().toInstant();
-                var exitThreshold = clock.instant().plus(EXPIRY_EXIT_WINDOW);
                 if (!expiresAt.isAfter(exitThreshold)) {
-                    logger.error("{} expires at {}, within the {} minute exit window. Exiting.",
-                            description, expiresAt, EXPIRY_EXIT_WINDOW.toMinutes());
-                    exitApplication();
-                } else {
-                    logger.debug("{} expires at {}", description, expiresAt);
+                    logger.error("{} chain member '{}' expires at {}, within the {} minute exit window. Exiting.",
+                            description, certificate.getSubjectX500Principal().getName(), expiresAt,
+                            EXPIRY_EXIT_WINDOW.toMinutes());
+                    exitAction.run();
+                    return;
                 }
+                logger.debug("{} chain member '{}' expires at {}",
+                        description, certificate.getSubjectX500Principal().getName(), expiresAt);
             }
         } catch (Exception e) {
             logger.error("Unable to verify {} expiry. Exiting.", description, e);
-            exitApplication();
+            exitAction.run();
         }
     }
 
-    private List<X509Certificate> loadCertificates(String certificateLocation, boolean firstCertificateOnly) throws Exception {
+    private List<X509Certificate> loadCertificates(String certificateLocation) throws Exception {
         var resourceLocation = TlsConfigurationProperties.normalizeResourceLocation(certificateLocation);
         var resource = resourceLoader.getResource(resourceLocation);
         try (InputStream inputStream = resource.getInputStream()) {
             var certificateFactory = CertificateFactory.getInstance("X.509");
-            Collection<X509Certificate> certificates = certificateFactory.generateCertificates(inputStream)
+            var certificates = certificateFactory.generateCertificates(inputStream)
                     .stream()
                     .filter(X509Certificate.class::isInstance)
                     .map(X509Certificate.class::cast)
+                    .sorted(Comparator.comparing(cert -> cert.getNotAfter().toInstant()))
                     .toList();
             if (certificates.isEmpty()) {
                 throw new IllegalStateException("No X.509 certificate found in " + certificateLocation);
             }
-
-            if (firstCertificateOnly) {
-                return List.of(certificates.iterator().next());
-            }
-
-            return new ArrayList<>(certificates);
+            return certificates;
         }
     }
 

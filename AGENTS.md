@@ -68,10 +68,12 @@ paths, `classpath:`, explicit `file:` URLs, and `https:` URLs are passed through
 Boot SSL bundles. Plain `http:` URLs are rejected for TLS resources. TLS files are loaded
 at startup; restart the app/container after certificate, private key, or client CA
 rotation. When TLS is configured, a daemon scheduled executor named
-`dns-client-cert-expiry-monitor` checks the server certificate, and the client CA
-certificate when present, immediately and then every 5 minutes. If any checked
-certificate expires within 10 minutes of the check time, the app exits with a non-zero
-status so the container supervisor can restart it. Do not commit certificates, private
+`dns-client-cert-expiry-monitor` checks every certificate in the server PEM
+(leaf and intermediates) and every certificate in the client CA bundle, when
+present, immediately and then every 5 minutes. The monitor exits on the
+earliest `notAfter` that falls within 10 minutes of the check time, naming the
+offending chain member in the log. Exiting with a non-zero status lets the
+container supervisor restart the app. Do not commit certificates, private
 keys, or CA material to the repository.
 
 ## Supported record types
