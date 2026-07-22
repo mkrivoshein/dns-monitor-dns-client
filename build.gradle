@@ -23,6 +23,8 @@ group = 'io.dnsmonitor.dns'
 
 // Derive project.version from the nearest git tag (default: 0.1.0).
 // Tag format is "v<version>" matching existing tags (v5.0.1, v5.1.0, ...).
+// Off-tag versions are decorated with the short commit SHA instead of the
+// branch name, and the snapshot suffix is `-rc` (not `-SNAPSHOT`).
 // Override at release time via:
 //   ./gradlew markNextVersion -Prelease.version=5.2.0
 scmVersion {
@@ -30,6 +32,13 @@ scmVersion {
 		prefix = 'v'
 		versionSeparator = ''
 	}
+	// Decorate non-main commits with the short SHA (e.g. 5.1.0-c143976)
+	// instead of the default branch-name decoration.
+	versionCreator('versionWithCommitHash')
+	// Use -rc instead of the default -SNAPSHOT suffix.
+	// The snapshot creator's return value is appended to the decorated
+	// version, so we return just the suffix.
+	snapshotCreator({ v, position -> '-rc' })
 	// Match Reckon's old behaviour of restricting the "release" flow to the
 	// main branch. Tags outside main are still detected (and used to set
 	// project.version) but the `release` task refuses to run on them.

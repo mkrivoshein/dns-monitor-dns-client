@@ -104,8 +104,12 @@ registry access.
 `project.version` is derived from the nearest git tag by
 [axion-release-plugin](https://github.com/allegro/axion-release-plugin) (1.21.x).
 Tags use the `v<version>` prefix (e.g. `v5.1.0`), matching the project's existing tag
-convention. On a non-tagged commit the resolved version is decorated with the branch
-name (e.g. `5.1.0-main`) so snapshots are obvious in image tags.
+convention. A tagged commit produces the bare tag version (e.g. `5.1.0`).
+
+Off-tag commits are decorated to make snapshots obvious in image tags:
+
+- on `main` without a tag at HEAD: `<next>-rc` (e.g. `5.1.1-rc`)
+- on a feature branch: `<next>-<short-sha>-rc` (e.g. `5.1.1-c143976-rc`)
 
 Release flow:
 
