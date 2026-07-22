@@ -120,7 +120,13 @@ Release flow:
    (`europe-docker.pkg.dev/dnsmonitor/containers/dns-client:5.2.0` and `:latest`).
 
 `./gradlew currentVersion` prints the resolved version; use it to confirm what Jib will
-produce. `release` is restricted to the `main` branch.
+produce. To override the resolved version when cutting a release:
+
+```bash
+./gradlew markNextVersion -Prelease.version=5.2.0
+```
+
+`release` is restricted to the `main` branch.
 
 ## CI / GitHub Actions
 
