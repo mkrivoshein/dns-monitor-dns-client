@@ -6,7 +6,7 @@ Guidance for AI agents (e.g. Claude Code) working in this repository.
 
 `dns-monitor-dns-client` is a Spring Boot 4.x RESTful service that performs DNS lookups
 via [dnsjava](https://github.com/dnsjava/dnsjava) and exposes the results as JSON.
-It runs on port **8001** and is published as an OCI container image to Google Artifact Registry.
+It runs on port **8001** by default and is published as an OCI container image to Google Artifact Registry.
 
 ## Build and test
 
@@ -30,6 +30,7 @@ will download it automatically if `asdf` or another toolchain provider is not al
 |------|---------|
 | `src/main/java/io/dnsmonitor/dns/client/DnsClientController.java` | REST endpoints |
 | `src/main/java/io/dnsmonitor/dns/client/DnsClientWorker.java` | Orchestrates parallel DNS lookups |
+| `src/main/java/io/dnsmonitor/dns/client/config/ConditionalTlsEnvironmentPostProcessor.java` | Enables HTTPS/mTLS from startup TLS properties |
 | `src/main/java/io/dnsmonitor/dns/client/dnsjava/DnsJavaAdapter.java` | Wraps dnsjava |
 | `src/main/java/io/dnsmonitor/dns/client/model/` | DNS record POJOs (A, AAAA, MX, …) |
 | `src/main/java/io/dnsmonitor/dns/client/validators/` | `@Domain` and `@DnsRecordType` Jakarta constraint annotations |
@@ -47,6 +48,33 @@ Supported record types: `A`, `AAAA`, `CAA`, `CNAME`, `MX`, `NS`, `SOA`, `SRV`, `
 
 Input validation is enforced via Jakarta Bean Validation annotations; invalid inputs return
 HTTP 400 with a plain-text error message.
+
+## HTTP, HTTPS, and mTLS
+
+The service starts as plain HTTP when no TLS certificate/key is configured. Supplying both
+a server certificate and private key at startup enables HTTPS. Supplying a client CA in
+addition enables mTLS by requiring clients to present certificates signed by that CA.
+
+Supported startup properties:
+
+| Property | Environment aliases | Purpose |
+|----------|---------------------|---------|
+| `dns.client.tls.certificate` | `DNS_CLIENT_TLS_CERTIFICATE`, `DNS_CLIENT_TLS_CERT` | Server certificate path/resource |
+| `dns.client.tls.private-key` | `DNS_CLIENT_TLS_PRIVATE_KEY`, `DNS_CLIENT_TLS_KEY` | Server private key path/resource |
+| `dns.client.tls.client-ca` | `DNS_CLIENT_TLS_CLIENT_CA` | Client CA certificate path/resource; enables required client auth |
+
+Absolute filesystem paths are converted to `file:` resource URLs automatically. Relative
+paths, `classpath:`, explicit `file:` URLs, and `https:` URLs are passed through to Spring
+Boot SSL bundles. Plain `http:` URLs are rejected for TLS resources. TLS files are loaded
+at startup; restart the app/container after certificate, private key, or client CA
+rotation. When TLS is configured, a daemon scheduled executor named
+`dns-client-cert-expiry-monitor` checks every certificate in the server PEM
+(leaf and intermediates) and every certificate in the client CA bundle, when
+present, immediately and then every 5 minutes. The monitor exits on the
+earliest `notAfter` that falls within 10 minutes of the check time, naming the
+offending chain member in the log. Exiting with a non-zero status lets the
+container supervisor restart the app. Do not commit certificates, private
+keys, or CA material to the repository.
 
 ## Supported record types
 
@@ -82,6 +110,25 @@ registry access.
 | `dependency-submission.yml` | Push | Submit dependency graph to GitHub |
 
 Secrets (`GOOGLE_CREDENTIALS`, etc.) are managed in GitHub Actions — never hard-code them.
+
+## Commit Format
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) with GPG signing.
+
+When adding an AI attribution trailer, use the one that matches the assistant
+that made the change:
+
+Co-Authored-By: Grok (x-ai/grok-code-fast-1) <kilo@kilo.ai>
+Co-Authored-By: Codex (GPT-5) <codex@openai.com>
+Co-Authored-By: Gemini 3 Flash <noreply@google.com>
+Co-Authored-By: Claude (claude-opus-4-7) <noreply@anthropic.com>
+Co-Authored-By: Claude (claude-sonnet-4-6) <noreply@anthropic.com>
+Co-Authored-By: MiniMax-M3 <noreply@minimax.io>
+
+Common types: `feat`, `fix`, `test`, `refactor`, `chore`.
+Common scopes: `meter`, `invoice`, `pricing`, `metrics`, `vault`, `stripe`, `xero`.
+
+If signing fails due to a locked key, stop and wait — do not fall back to an unsigned commit.
 
 ## Coding conventions
 
