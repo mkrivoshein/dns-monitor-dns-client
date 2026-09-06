@@ -156,8 +156,8 @@ Secrets (`GOOGLE_CREDENTIALS`, etc.) are managed in GitHub Actions — never har
 
 Use [Conventional Commits](https://www.conventionalcommits.org/) with GPG signing.
 
-When adding an AI attribution trailer, use the one that matches the assistant
-that made the change:
+Add exactly one AI attribution trailer at the end of the commit message,
+choosing the line that matches the assistant that made the change:
 
 Co-Authored-By: Grok (x-ai/grok-code-fast-1) <kilo@kilo.ai>
 Co-Authored-By: Codex (GPT-5) <codex@openai.com>
