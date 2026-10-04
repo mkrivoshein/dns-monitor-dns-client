@@ -18,16 +18,16 @@ buildscript {
 			force 'org.bouncycastle:bcutil-jdk18on:1.85'
 			// spring-boot-gradle-plugin -> spring-boot-buildpack-platform requests
 			// Jackson 3.1.4. Dependency Review records that classpath node.
-			// GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf. Do not go past 3.1.6.
+			// GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf. GitHub marks <= 3.1.6 vulnerable; first patched is 3.1.7.
 			dependencySubstitution {
-				substitute module('tools.jackson.core:jackson-core:3.1.4') using module('tools.jackson.core:jackson-core:3.1.6')
-				substitute module('tools.jackson.core:jackson-databind:3.1.4') using module('tools.jackson.core:jackson-databind:3.1.6')
-				substitute module('tools.jackson:jackson-bom:3.1.4') using module('tools.jackson:jackson-bom:3.1.6')
+				substitute module('tools.jackson.core:jackson-core:3.1.4') using module('tools.jackson.core:jackson-core:3.1.7')
+				substitute module('tools.jackson.core:jackson-databind:3.1.4') using module('tools.jackson.core:jackson-databind:3.1.7')
+				substitute module('tools.jackson:jackson-bom:3.1.4') using module('tools.jackson:jackson-bom:3.1.7')
 			}
 			eachDependency { details ->
 				def group = details.requested.group
-				if (group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.')) && details.requested.version == '3.1.4') {
-					details.useVersion('3.1.6')
+				if (group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.')) && details.requested.version in ['3.1.4', '3.1.6']) {
+					details.useVersion('3.1.7')
 					details.because('Replace vulnerable Jackson 3.1.4')
 				}
 			}
@@ -83,7 +83,7 @@ ext {
 	set('opentelemetry.version', "1.62.0")
 
 	set('commons-lang3.version', '3.20.0')
-	set('jackson-bom.version', '3.1.6') // CVE fix: document length constraint bypass in jackson-core 3.1.0
+	set('jackson-bom.version', '3.1.7') // CVE fix: document length constraint bypass in jackson-core 3.1.0
 	set('tomcat.version', '11.0.26') // Dependabot Tomcat criticals need >= 11.0.25; no Boot release manages that yet
 }
 
@@ -106,13 +106,13 @@ abstract class AlignJackson314Rule implements ComponentMetadataRule {
 				for (dep in new ArrayList(deps)) {
 					def group = dep.group
 					def required = dep.versionConstraint?.requiredVersion
-					if (required == '3.1.4' && group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.'))) {
+					if (required in ['3.1.4', '3.1.6'] && group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.'))) {
 						replacements << [group, dep.name]
 					}
 				}
 				replacements.unique().each { group, name ->
-					deps.removeAll { it.group == group && it.name == name && it.versionConstraint.requiredVersion == '3.1.4' }
-					deps.add("${group}:${name}:3.1.6")
+					deps.removeAll { it.group == group && it.name == name && it.versionConstraint.requiredVersion in ['3.1.4', '3.1.6'] }
+					deps.add("${group}:${name}:3.1.7")
 				}
 			}
 		}
@@ -121,14 +121,14 @@ abstract class AlignJackson314Rule implements ComponentMetadataRule {
 
 configurations.configureEach { configuration ->
 	configuration.resolutionStrategy.dependencySubstitution {
-		substitute module('tools.jackson.core:jackson-core:3.1.4') using module('tools.jackson.core:jackson-core:3.1.6')
-		substitute module('tools.jackson.core:jackson-databind:3.1.4') using module('tools.jackson.core:jackson-databind:3.1.6')
-		substitute module('tools.jackson:jackson-bom:3.1.4') using module('tools.jackson:jackson-bom:3.1.6')
+		substitute module('tools.jackson.core:jackson-core:3.1.4') using module('tools.jackson.core:jackson-core:3.1.7')
+		substitute module('tools.jackson.core:jackson-databind:3.1.4') using module('tools.jackson.core:jackson-databind:3.1.7')
+		substitute module('tools.jackson:jackson-bom:3.1.4') using module('tools.jackson:jackson-bom:3.1.7')
 	}
 	configuration.resolutionStrategy.eachDependency { details ->
 		def group = details.requested.group
-		if (group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.')) && details.requested.version == '3.1.4') {
-			details.useVersion('3.1.6')
+		if (group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.')) && details.requested.version in ['3.1.4', '3.1.6']) {
+			details.useVersion('3.1.7')
 			details.because('Replace vulnerable Jackson 3.1.4')
 		}
 	}
