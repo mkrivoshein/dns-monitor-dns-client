@@ -21,7 +21,7 @@ buildscript {
 }
 
 plugins {
-	id 'org.springframework.boot' version '4.0.6'
+	id 'org.springframework.boot' version '4.0.7'
 	id "io.spring.dependency-management" version "1.1.7"
 	id 'com.google.cloud.tools.jib' version '3.5.3'
 	id 'pl.allegro.tech.build.axion-release' version '1.21.2'
@@ -61,14 +61,15 @@ scmVersion {
 version = scmVersion.version
 
 ext {
-	set('spring-framework.version', '7.0.7')
+	set('spring-framework.version', '7.0.8')
 	set('spring-cloud.version', "2025.1.1")
-	set('micrometer.version', "1.16.4")
+	set('micrometer.version', "1.16.6")
 	set('micrometer-tracing.version', "1.6.4")
-	set('opentelemetry.version', "1.55.0")
+	set('opentelemetry.version', "1.62.0")
 
 	set('commons-lang3.version', '3.20.0')
-	set('jackson-bom.version', '3.1.1') // CVE fix: document length constraint bypass in jackson-core 3.1.0
+	set('jackson-bom.version', '3.1.6') // CVE fix: document length constraint bypass in jackson-core 3.1.0
+	set('tomcat.version', '11.0.26') // Dependabot Tomcat criticals need >= 11.0.25; no Boot release manages that yet
 }
 
 application {
@@ -116,8 +117,10 @@ dependencyManagement {dm ->
 		mavenBom "org.springframework:spring-framework-bom:${ext.get('spring-framework.version')}"
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${ext.get('spring-cloud.version')}"
 		mavenBom "io.opentelemetry:opentelemetry-bom:${ext.get('opentelemetry.version')}"
-		mavenBom "io.micrometer:micrometer-bom:${ext.get('micrometer.version')}"
+		// tracing-bom 1.6.4 imports micrometer-bom 1.16.4. Import it first so the
+		// explicit micrometer-bom below wins and micrometer-core stays on 1.16.6.
 		mavenBom "io.micrometer:micrometer-tracing-bom:${ext.get('micrometer-tracing.version')}"
+		mavenBom "io.micrometer:micrometer-bom:${ext.get('micrometer.version')}"
 	}
 	dependencies {
 		dependency 'dnsjava:dnsjava:3.6.5'
