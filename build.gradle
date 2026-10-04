@@ -16,12 +16,27 @@ buildscript {
 			force 'org.bouncycastle:bcpkix-jdk18on:1.85'
 			force 'org.bouncycastle:bcpg-jdk18on:1.85'
 			force 'org.bouncycastle:bcutil-jdk18on:1.85'
+			// spring-boot-gradle-plugin -> spring-boot-buildpack-platform requests
+			// Jackson 3.1.4. Dependency Review records that classpath node.
+			// GHSA-p6pp-m3f8-5c89, GHSA-7hhh-6rmp-j9qf. GitHub marks <= 3.1.6 vulnerable; first patched is 3.1.7.
+			dependencySubstitution {
+				substitute module('tools.jackson.core:jackson-core:3.1.4') using module('tools.jackson.core:jackson-core:3.1.7')
+				substitute module('tools.jackson.core:jackson-databind:3.1.4') using module('tools.jackson.core:jackson-databind:3.1.7')
+				substitute module('tools.jackson:jackson-bom:3.1.4') using module('tools.jackson:jackson-bom:3.1.7')
+			}
+			eachDependency { details ->
+				def group = details.requested.group
+				if (group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.')) && details.requested.version in ['3.1.4', '3.1.6']) {
+					details.useVersion('3.1.7')
+					details.because('Replace vulnerable Jackson 3.1.4')
+				}
+			}
 		}
 	}
 }
 
 plugins {
-	id 'org.springframework.boot' version '4.0.6'
+	id 'org.springframework.boot' version '4.0.7'
 	id "io.spring.dependency-management" version "1.1.7"
 	id 'com.google.cloud.tools.jib' version '3.5.3'
 	id 'pl.allegro.tech.build.axion-release' version '1.21.2'
@@ -61,14 +76,15 @@ scmVersion {
 version = scmVersion.version
 
 ext {
-	set('spring-framework.version', '7.0.7')
+	set('spring-framework.version', '7.0.8')
 	set('spring-cloud.version', "2025.1.1")
-	set('micrometer.version', "1.16.4")
+	set('micrometer.version', "1.16.6")
 	set('micrometer-tracing.version', "1.6.4")
-	set('opentelemetry.version', "1.55.0")
+	set('opentelemetry.version', "1.62.0")
 
 	set('commons-lang3.version', '3.20.0')
-	set('jackson-bom.version', '3.1.1') // CVE fix: document length constraint bypass in jackson-core 3.1.0
+	set('jackson-bom.version', '3.1.7') // CVE fix: document length constraint bypass in jackson-core 3.1.0
+	set('tomcat.version', '11.0.26') // Dependabot Tomcat criticals need >= 11.0.25; no Boot release manages that yet
 }
 
 application {
@@ -79,7 +95,50 @@ jar {
 	enabled = false
 }
 
+// Rewrite module metadata that still requests tools.jackson* 3.1.4 so the
+// resolved graph and the dependencies report do not contain that version.
+// spring-boot-jackson 4.0.7 hardcodes jackson-databind 3.1.4.
+abstract class AlignJackson314Rule implements ComponentMetadataRule {
+	void execute(ComponentMetadataContext context) {
+		context.details.allVariants {
+			withDependencies { deps ->
+				def replacements = []
+				for (dep in new ArrayList(deps)) {
+					def group = dep.group
+					def required = dep.versionConstraint?.requiredVersion
+					if (required in ['3.1.4', '3.1.6'] && group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.'))) {
+						replacements << [group, dep.name]
+					}
+				}
+				replacements.unique().each { group, name ->
+					deps.removeAll { it.group == group && it.name == name && it.versionConstraint.requiredVersion in ['3.1.4', '3.1.6'] }
+					deps.add("${group}:${name}:3.1.7")
+				}
+			}
+		}
+	}
+}
+
+configurations.configureEach { configuration ->
+	configuration.resolutionStrategy.dependencySubstitution {
+		substitute module('tools.jackson.core:jackson-core:3.1.4') using module('tools.jackson.core:jackson-core:3.1.7')
+		substitute module('tools.jackson.core:jackson-databind:3.1.4') using module('tools.jackson.core:jackson-databind:3.1.7')
+		substitute module('tools.jackson:jackson-bom:3.1.4') using module('tools.jackson:jackson-bom:3.1.7')
+	}
+	configuration.resolutionStrategy.eachDependency { details ->
+		def group = details.requested.group
+		if (group != null && (group == 'tools.jackson' || group.startsWith('tools.jackson.')) && details.requested.version in ['3.1.4', '3.1.6']) {
+			details.useVersion('3.1.7')
+			details.because('Replace vulnerable Jackson 3.1.4')
+		}
+	}
+}
+
 dependencies {
+	components {
+		all(AlignJackson314Rule)
+	}
+
 	// Spring Boot starters
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -116,8 +175,10 @@ dependencyManagement {dm ->
 		mavenBom "org.springframework:spring-framework-bom:${ext.get('spring-framework.version')}"
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${ext.get('spring-cloud.version')}"
 		mavenBom "io.opentelemetry:opentelemetry-bom:${ext.get('opentelemetry.version')}"
-		mavenBom "io.micrometer:micrometer-bom:${ext.get('micrometer.version')}"
+		// tracing-bom 1.6.4 imports micrometer-bom 1.16.4. Import it first so the
+		// explicit micrometer-bom below wins and micrometer-core stays on 1.16.6.
 		mavenBom "io.micrometer:micrometer-tracing-bom:${ext.get('micrometer-tracing.version')}"
+		mavenBom "io.micrometer:micrometer-bom:${ext.get('micrometer.version')}"
 	}
 	dependencies {
 		dependency 'dnsjava:dnsjava:3.6.5'
