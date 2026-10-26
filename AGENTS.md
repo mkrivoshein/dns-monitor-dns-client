@@ -21,7 +21,7 @@ It runs on port **8001** by default and is published as an OCI container image t
 ./gradlew bootRun
 ```
 
-Java 21 (Adoptium/Temurin) is required. The toolchain is declared in `build.gradle`; Gradle
+Java 25 (Adoptium/Temurin) is required. The toolchain is declared in `build.gradle`; Gradle
 will download it automatically if `asdf` or another toolchain provider is not already set up.
 
 ## Key source locations
@@ -94,7 +94,7 @@ from the controller without a good reason.
 ## Container image
 
 Built with [Jib](https://github.com/GoogleContainerTools/jib) (`./gradlew jib`).
-Base image: `eclipse-temurin:21-noble`. Published to
+Base image: `eclipse-temurin:25-noble`. Published to
 `europe-docker.pkg.dev/dnsmonitor/containers/dns-client`. Publishing requires GCP credentials
 and is handled by the CI pipeline — do not run `jib` locally unless you have explicit
 registry access.
@@ -173,7 +173,7 @@ If signing fails due to a locked key, stop and wait — do not fall back to an u
 
 ## Coding conventions
 
-- Java 21; use `var`, records, and sealed types where appropriate.
+- Java 25; use `var`, records, and sealed types where appropriate.
 - Spring constructor injection only (no `@Autowired` on fields).
 - Validation belongs in the `validators` package using Jakarta constraint annotations.
 - Record type strings are always compared case-insensitively (`toUpperCase()`).
