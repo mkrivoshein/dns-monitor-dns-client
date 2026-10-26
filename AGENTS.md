@@ -21,7 +21,7 @@ It runs on port **8001** by default and is published as an OCI container image t
 ./gradlew bootRun
 ```
 
-Java 25 (Adoptium/Temurin) is required. The toolchain is declared in `build.gradle`; Gradle
+Java 25 (BellSoft Liberica) is required. The toolchain is declared in `build.gradle`; Gradle
 will download it automatically if `asdf` or another toolchain provider is not already set up.
 
 ## Key source locations
@@ -94,7 +94,7 @@ from the controller without a good reason.
 ## Container image
 
 Built with [Jib](https://github.com/GoogleContainerTools/jib) (`./gradlew jib`).
-Base image: `eclipse-temurin:25-noble`. Published to
+Base image: `bellsoft/liberica-runtime-container:jre-25-glibc` (Alpaquita Linux, glibc). Published to
 `europe-docker.pkg.dev/dnsmonitor/containers/dns-client`. Publishing requires GCP credentials
 and is handled by the CI pipeline — do not run `jib` locally unless you have explicit
 registry access.

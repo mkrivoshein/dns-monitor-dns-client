@@ -43,7 +43,7 @@ Invalid domains or unsupported record types return HTTP 400.
 
 ## Running locally
 
-**Prerequisites:** Java 25 (Temurin)
+**Prerequisites:** Java 25 (BellSoft Liberica)
 
 ```bash
 ./gradlew bootRun
@@ -124,7 +124,7 @@ container supervisor can restart it and load fresh TLS material.
 | Framework | Spring Boot 4.x |
 | DNS resolution | [dnsjava](https://github.com/dnsjava/dnsjava) |
 | Observability | Micrometer Tracing (OpenTelemetry) |
-| Container image | [Jib](https://github.com/GoogleContainerTools/jib) → `eclipse-temurin:25-noble` |
+| Container image | [Jib](https://github.com/GoogleContainerTools/jib) → `bellsoft/liberica-runtime-container:jre-25-glibc` |
 | Build | Gradle 9, Java 25 |
 
 ## Container image
