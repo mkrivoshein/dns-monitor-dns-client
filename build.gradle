@@ -191,7 +191,7 @@ java {
 	targetCompatibility = 25
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(25)
-		vendor = JvmVendorSpec.ADOPTIUM
+		vendor = JvmVendorSpec.BELLSOFT
 	}
 }
 
@@ -207,7 +207,7 @@ def imageVersion = version.toString()
 
 jib {
 	from {
-		image = 'eclipse-temurin:25-noble' // Noble = Ubuntu 24.04 LTS
+		image = 'bellsoft/liberica-runtime-container:jre-25-glibc' // Alpaquita Linux (glibc), JRE 25
 	}
 	to {
 		image = 'europe-docker.pkg.dev/dnsmonitor/containers/dns-client'
