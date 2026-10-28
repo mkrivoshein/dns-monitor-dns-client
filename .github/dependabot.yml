@@ -18,3 +18,10 @@ updates:
       interval: "weekly"
     reviewers:
       - "mkrivoshein"
+
+  - package-ecosystem: "docker"
+    directory: "/base-image"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "mkrivoshein"

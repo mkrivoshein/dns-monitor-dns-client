@@ -124,7 +124,7 @@ container supervisor can restart it and load fresh TLS material.
 | Framework | Spring Boot 4.x |
 | DNS resolution | [dnsjava](https://github.com/dnsjava/dnsjava) |
 | Observability | Micrometer Tracing (OpenTelemetry) |
-| Container image | [Jib](https://github.com/GoogleContainerTools/jib) → `bellsoft/liberica-runtime-container:jre-25-glibc` |
+| Container image | [Jib](https://github.com/GoogleContainerTools/jib) → `bellsoft/liberica-runtime-container:jre-25-glibc` (pinned by digest in `base-image/Dockerfile`) |
 | Build | Gradle 9, Java 25 |
 
 ## Container image
