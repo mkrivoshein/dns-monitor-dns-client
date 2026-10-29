@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public class DnsClientWorker {
-    private final static Set<String> RECORD_TYPES = Set.of(
+    public final static Set<String> RECORD_TYPES = Set.of(
             "A",
             "AAAA",
             "CAA",
@@ -25,6 +25,10 @@ public class DnsClientWorker {
         this.dnsJavaAdapter = dnsJavaAdapter;
     }
 
+    public static boolean isSupported(String recordType) {
+        return RECORD_TYPES.contains(recordType.toUpperCase());
+    }
+
     public List<DnsRecord> lookup(String domain) {
         return RECORD_TYPES.stream()
                 .parallel()
@@ -33,7 +37,7 @@ public class DnsClientWorker {
     }
 
     public List<DnsRecord> lookup(String recordType, String domain) {
-        if (RECORD_TYPES.contains(recordType.toUpperCase())) {
+        if (isSupported(recordType)) {
             DnsLookupCommand dnsLookupCommand = dnsJavaAdapter.prepareLookup(recordType, domain);
             return dnsLookupCommand.lookupDnsRecords();
         } else {
