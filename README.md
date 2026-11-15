@@ -166,6 +166,38 @@ src/main/java/io/dnsmonitor/dns/client/
 4. Add a mapping case in `ModelTransformer`
 5. Add a test in `DnsJavaAdapterTest`
 
+### Container integration test
+
+`scripts/integration-test.sh` builds the Jib image to a tar, loads it into podman or docker,
+and tests the running container end to end. It checks:
+
+- `/actuator/health` reports `UP`
+- all 9 record types on `example.com`, plus a few extra lookups, against DNS-over-HTTPS
+- bad input returns 400
+- the container shuts down gracefully on SIGTERM
+
+With `--tls` it also tests HTTPS, mTLS and the certificate expiry monitor. It uses throwaway
+certificates that it generates with `openssl` in a temp directory. It cleans up the
+containers, the network and the image it built, and exits non-zero if any check fails.
+
+```bash
+# Build the image and test it (needs Java 25, podman or docker, curl, python3)
+scripts/integration-test.sh
+
+# Add the HTTPS, mTLS and certificate-expiry checks (needs openssl)
+scripts/integration-test.sh --tls
+
+# Test an image you already have, without the DoH cross-check (offline)
+scripts/integration-test.sh --image europe-docker.pkg.dev/dnsmonitor/containers/dns-client:latest --skip-doh
+
+# On hosts that intercept DNS on port 53, send the app's lookups through a CoreDNS
+# DNS-over-TLS forwarder container
+scripts/integration-test.sh --dot --tls
+```
+
+The engine is detected automatically. Set `CONTAINER_ENGINE=docker` or `CONTAINER_ENGINE=podman`
+to choose one. Run `scripts/integration-test.sh --help` for every option.
+
 ## License
 
 See [LICENSE](LICENSE).
