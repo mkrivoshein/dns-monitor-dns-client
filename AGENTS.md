@@ -94,7 +94,9 @@ from the controller without a good reason.
 ## Container image
 
 Built with [Jib](https://github.com/GoogleContainerTools/jib) (`./gradlew jib`).
-Base image: `bellsoft/liberica-runtime-container:jre-25-glibc` (Alpaquita Linux, glibc). Published to
+Base image: `bellsoft/liberica-runtime-container:jre-25-glibc` (Alpaquita Linux, glibc), pinned by digest in
+`base-image/Dockerfile`, which `build.gradle` reads and Dependabot's docker ecosystem bumps.
+Published to
 `europe-docker.pkg.dev/dnsmonitor/containers/dns-client`. Publishing requires GCP credentials
 and is handled by the CI pipeline — do not run `jib` locally unless you have explicit
 registry access.

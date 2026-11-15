@@ -205,9 +205,14 @@ test {
 // under the configuration cache).
 def imageVersion = version.toString()
 
+// Jib base image, pinned by digest in base-image/Dockerfile so Dependabot's
+// docker ecosystem can bump it through PRs (it does not scan build.gradle).
+def baseImage = file('base-image/Dockerfile').readLines()
+	.find { it.startsWith('FROM ') }.substring('FROM '.length()).trim()
+
 jib {
 	from {
-		image = 'bellsoft/liberica-runtime-container:jre-25-glibc' // Alpaquita Linux (glibc), JRE 25
+		image = baseImage // Alpaquita Linux (glibc), JRE 25
 	}
 	to {
 		image = 'europe-docker.pkg.dev/dnsmonitor/containers/dns-client'
